@@ -1,0 +1,56 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: greeter-service
+    version: v3
+  name: greeter-service-v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeter-service
+      version: v3
+  template:
+    metadata:
+      labels:
+        app: greeter-service
+        version: v3
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: "http"
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - image: docker-registry.default.svc:5000/istio-greeter/greeter-service:v3
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: "/health"
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 1
+        name: greeter-service
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: "/health"
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+        securityContext:
+          privileged: false
