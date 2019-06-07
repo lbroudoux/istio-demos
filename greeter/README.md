@@ -21,7 +21,7 @@ $ oc adm policy add-scc-to-user privileged -z default -n istio-greeter
 ## Build the components
 
 Follow this 2 documents for building:
-* Build `greeter-service` with (./greeter-service/build.md),
+* Build `greeter-service` with [build.md](./greeter-service/build.md),
 * Build `greeter-client` with [./greeter-client/build.md].
 
 ## Deploy the components
