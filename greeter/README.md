@@ -21,7 +21,7 @@ $ oc adm policy add-scc-to-user privileged -z default -n istio-greeter
 ## Build the components
 
 Follow this 2 documents for building:
-* Build `greeter-service` with [./greeter-service/build.md],
+* Build `greeter-service` with (./greeter-service/build.md),
 * Build `greeter-client` with [./greeter-client/build.md].
 
 ## Deploy the components
@@ -122,7 +122,7 @@ Apply some new routing roules, so that we reach `v3` service:
 
 ```
 $ oc replace -f ./istiofiles/dr-greeter-service.yml
-$ oc replace -f ./istiofiles/vs-greeter-service-v1-70-v3-30-retry.yml
+$ oc replace -f ./istiofiles/vs-greeter-service-v1-70-v3-30.yml
 ```
 
 Scale the number of `v3` pods to at least 2.
@@ -137,7 +137,65 @@ Following requests to / will wait 3s
 sh-4.4# exit
 ```
 
+Now apply a new definition for VirtualService, allowing to check for a defined timeout before returning a response (thus allowing the invoking service to wait too long and thus making the whole system collape).
+
+```
+$ oc replace -f ./istiofiles/vs-greeter-service-v1-50-v3-50-timeout.yml
+```
+
+Restart the polling script and see the invocations traces:
+
+```
+Greeting result => Hello Laurent from 5947f55fcf-48mqn
+Greeting result => Namaste Laurent from 99b7457cf-flj4b
+Greeting result => Hello Laurent from 5947f55fcf-48mqn
+Greeting result => Error: 504 - upstream request timeout
+Greeting result => Hello Laurent from 5947f55fcf-48mqn
+Greeting result => Namaste Laurent from 99b7457cf-flj4b
+Greeting result => Hello Laurent from 5947f55fcf-48mqn
+Greeting result => Hello Laurent from 5947f55fcf-48mqn
+Greeting result => Error: 504 - upstream request timeout
+```
+
+* `Error: 504 responses` are produced before waiting 3s, just after 1s
+* Timedout pod is still called in a round-robin fashion, it is not removed from pool
+
+You can now apply a new DestinationRule definition to allow outlier detection and temporary removing from pool:
+
+```
+$ oc replace -f ./istiofiles/dr-greeter-service-cb-v1-v3.yml
+```
+
+* Details Circuit Breaker configuration 
+
+Now, `504` error may occur just once or twice before being detected as outlier and removed from pool for `30s`. If letting the polling script a long time, you should see this errors frequence droppped as the eviction algorithm takes care of the number of time is has been detected as an outlier to weight the evistion time.
+
+Reset pod so that it responds immediatly.
+
+```
+$ oc rsh greeter-service-v3-99b7457cf-rw5lv
+Defaulting container name to greeter-service.
+Use 'oc describe pod/greeter-service-v3-99b7457cf-rw5lv -n istio-greeter' to see all of the containers in this pod.
+sh-4.4# curl localhost:8080/api/greet/flag/timein
+Following requests to / will not wait
+sh-4.4# exit
+```
+
 ### Super resilient invokations with retries, timeout and circuit-breaker
 
+Finally, combine all what we learned for super resilient invokations!!
 
-### Enable MTS
+Scale the number of `v2` pods to at least 2 and apply misbehaviour on 1 of them.
+Scale the number of `v3` pods to at least 2 and apply timeout on 1 of them.
+
+```
+$ oc replace -f ./istiofiles/dr-greeter-service-cb-all.yml
+$ oc replace -f ./istiofiles/vs-greeter-service-all-retry-timeout.yml
+```
+
+* Review configurations
+* See that we lower the `perTryTimeout` value to fit with the global `timeout`
+* Take some time to introspect the graph and metrices in Kiali (checking for example for response code on `v2` and `v3` services)
+
+### Enable MTLS
+
