@@ -22,13 +22,13 @@ $ oc adm policy add-scc-to-user privileged -z default -n istio-greeter
 
 Follow this 2 documents for building:
 * Build `greeter-service` with [build.md](./greeter-service/build.md),
-* Build `greeter-client` with [./greeter-client/build.md].
+* Build `greeter-client` with [build.md](./greeter-client/build.md).
 
 ## Deploy the components
 
 Follow this 2 documents for deploying:
-* Build `greeter-service` with [./greeter-service/deploy.md],
-* Build `greeter-client` with [./greeter-client/deploy.md].
+* Deploy `greeter-service` with [deploy.md](./greeter-service/deploy.md),
+* Deploy `greeter-client` with [deploy.md](./greeter-client/deploy.m)].
 
 ## Demonstrate
 
@@ -65,7 +65,7 @@ Now test with this URL, that shoul reach `v2` service :
 $ curl "http://$(oc get route | grep greeter-client | awk '{print $2}')/api/greet/Laurent" -H 'x-channel: canary'
 ```
 
-* Evoke some other matching rules availbalble (here)[https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#HTTPMatchRequest]
+* Talk about some other matching rules availbalble (here)[https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#HTTPMatchRequest]
 * Optionnaly discuss header propagation in Quarkus and Micropofile application
 
 ### Split traffic between 2 versions
@@ -168,7 +168,7 @@ $ oc replace -f ./istiofiles/dr-greeter-service-cb-v1-v3.yml
 
 * Details Circuit Breaker configuration 
 
-Now, `504` error may occur just once or twice before being detected as outlier and removed from pool for `30s`. If letting the polling script a long time, you should see this errors frequence droppped as the eviction algorithm takes care of the number of time is has been detected as an outlier to weight the evistion time.
+Now, `504` errors may occur just once or twice before being detected as outlier and removed from pool for `30s`. If letting the polling script a long time, you should see this errors frequence droppped as the eviction algorithm takes care of the number of time is has been detected as an outlier to weight the evistion time.
 
 Reset pod so that it responds immediatly.
 
@@ -199,3 +199,15 @@ $ oc replace -f ./istiofiles/vs-greeter-service-all-retry-timeout.yml
 
 ### Enable MTLS
 
+Now just pursuing previous sequence, use Kiali to visualise and edit `greeter-service` destinationrule. Add the `tls` node under `trafficPolicy` like this:
+
+```
+spec:
+  host: greeter-service
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  ...
+```
+
+Save the definition and get back to the graphic in Kiali, making sure to display the secured badge. Wait for a few seconds and refresh, now you've got mutual TLS enabled between all the pods!

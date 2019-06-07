@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: greeter-service
+spec:
+  hosts:
+  - greeter-service
+  http:
+  - timeout: 1.000s
+    retries:
+      attempts: 5
+      perTryTimeout: 100ms
+      retryOn: 'gateway-error,connect-failure,refused-stream'
+    route:
+    - destination:
+        host: greeter-service
+        subset: v1
+      weight: 33
+    - destination:
+        host: greeter-service
+        subset: v2
+      weight: 33
+    - destination:
+        host: greeter-service
+        subset: v3
+      weight: 34

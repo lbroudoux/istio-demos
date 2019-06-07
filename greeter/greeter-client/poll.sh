@@ -6,5 +6,5 @@ URL="http://$(oc get route | grep greeter-client | awk '{print $2}')"
 while true
 do
   curl $URL/api/greet/Laurent
-  sleep 2
+  sleep 1
 done;

@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: greeter-service
+spec:
+  host: greeter-service
+  trafficPolicy:
+    connectionPool:
+      http:
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 10
+      tcp:
+        maxConnections: 10
+    loadBalancer:
+      simple: ROUND_ROBIN
+    outlierDetection:
+      baseEjectionTime: 1m
+      consecutiveErrors: 2
+      interval: 30s
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v3
+    labels:
+      version: v3
