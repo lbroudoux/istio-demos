@@ -23,7 +23,7 @@ As we have created a DeploymentConfig using CLI, we should now mark this Deploym
 On OpenShift Service Mesh, this could be simply done using `sidecar.istio.io/inject` annotation. So just patch the DeploymentConfig like this:
 
 ```
-$ oc patch dc/greeter-client --type=json -p '[{"op":"add", "path":"/spec/template/metadata/annotations/-", "value": {"sidecar.istio.io/inject": "true"}}'
+$ oc patch dc/greeter-client --type=json -p '[{"op":"add", "path":"/spec/template/metadata/annotations/-", "value": {"sidecar.istio.io/inject": "true"}}]'
 ```
 
 Wait for a few seconds and re-deployment should occur with side-car injected.

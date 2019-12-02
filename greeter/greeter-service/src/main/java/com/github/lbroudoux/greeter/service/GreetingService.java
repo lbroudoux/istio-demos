@@ -6,7 +6,7 @@ import javax.enterprise.context.ApplicationScoped;
 public class GreetingService {
 
     public String greeting(String name) {
-        return "Namaste " + name;
+        return "Hello " + name;
     }
 
 }

@@ -21,14 +21,14 @@ $ oc adm policy add-scc-to-user privileged -z default -n istio-greeter
 ## Build the components
 
 Follow this 2 documents for building:
-* Build `greeter-service` with [build.md](./greeter-service/build.md),
-* Build `greeter-client` with [build.md](./greeter-client/build.md).
+* Build `greeter-service` with [build.md](./greeter-service/openshift/build.md),
+* Build `greeter-client` with [build.md](./greeter-client//openshift/build.md).
 
 ## Deploy the components
 
 Follow this 2 documents for deploying:
-* Deploy `greeter-service` with [deploy.md](./greeter-service/deploy.md),
-* Deploy `greeter-client` with [deploy.md](./greeter-client/deploy.m)].
+* Deploy `greeter-service` with [deploy.md](./greeter-service/openshift/deploy.md),
+* Deploy `greeter-client` with [deploy.md](./greeter-client/openshift/deploy.md)].
 
 ## Demonstrate
 

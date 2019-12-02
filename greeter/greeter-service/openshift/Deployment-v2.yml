@@ -23,7 +23,8 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       containers:
-      - image: docker-registry.default.svc:5000/istio-greeter/greeter-service:v2
+      # - image: docker-registry.default.svc:5000/istio-greeter/greeter-service:v2
+      - image: image-registry.openshift-image-registry.svc:5000/istio-greeter/greeter-service:v2
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
